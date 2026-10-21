@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Трекер силлабуса КВО · Биология</title><style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --paper:#E9E6DA;
+    --paper-2:#F3F1E6;
+    --ink:#232420;
+    --ink-soft:#65614E;
+    --line:#D8D2BE;
+    --green:#3F6B4F;
+    --amber:#B8863B;
+    --todo:#BEB8A4;
+    --g7:#4F7350;
+    --g7-bg:#E8EFE4;
+    --g8:#3B5A73;
+    --g8-bg:#E6ECF1;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:720px; margin:0 auto; padding:30px 18px 90px; }
+
+  h1.page-title{
+    font-family:'Fraunces',Georgia,serif;
+    font-weight:600;
+    font-size:clamp(1.5rem,4.5vw,2rem);
+    margin:0 0 8px;
+    letter-spacing:-0.01em;
+  }
+  .page-sub{ color:var(--ink-soft); font-size:0.93rem; max-width:60ch; margin:0 0 24px; }
+
+  .hero{ display:flex; align-items:flex-end; gap:18px; margin-bottom:22px; flex-wrap:wrap; }
+  .hero-num{ font-family:'Fraunces',serif; font-weight:600; font-size:clamp(2.4rem,10vw,3.4rem); line-height:1; white-space:nowrap; }
+  .hero-side{ flex:1 1 160px; min-width:140px; padding-bottom:6px; }
+  .hero-label{ color:var(--ink-soft); font-size:0.82rem; margin-bottom:6px; }
+  .hero-bar{ height:8px; border-radius:5px; background:var(--line); overflow:hidden; }
+  .hero-fill{ height:100%; background:var(--ink); border-radius:5px; transition:width .4s ease; }
+
+  .roster-card{ border:1px solid var(--line); border-radius:10px; background:var(--paper-2); margin-bottom:26px; overflow:hidden; }
+  .roster-row{ display:flex; align-items:center; gap:12px; padding:11px 14px; border-top:1px solid var(--line); flex-wrap:wrap; }
+  .roster-row:first-child{ border-top:none; }
+  .roster-name{ flex:1 1 120px; text-align:left; background:none; border:none; font-family:'Inter'; font-weight:600; font-size:.95rem; color:var(--ink); cursor:pointer; padding:2px 0; }
+  .roster-grades{ display:flex; gap:14px; flex:0 0 auto; }
+  .roster-grade-stat{ display:flex; flex-direction:column; gap:3px; width:80px; }
+  .roster-grade-label{ font-size:.68rem; color:var(--ink-soft); white-space:nowrap; }
+  .roster-grade-bar{ height:5px; border-radius:4px; background:var(--line); overflow:hidden; }
+  .roster-grade-fill{ height:100%; border-radius:4px; transition:width .3s ease; }
+  .roster-grade-fill.g7{ background:var(--g7); }
+  .roster-grade-fill.g8{ background:var(--g8); }
+  .roster-remove{ font-size:.72rem; color:var(--ink-soft); background:none; border:1px solid var(--line); border-radius:16px; padding:4px 11px; cursor:pointer; white-space:nowrap; }
+  .roster-remove.confirm{ color:#8a2e2e; border-color:#8a2e2e; }
+  .roster-empty{ padding:16px 14px; color:var(--ink-soft); font-size:.9rem; }
+
+  .add-row{ display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--line); }
+  .add-input{ flex:1; border:1px solid var(--line); border-radius:8px; padding:9px 11px; font-family:'Inter'; font-size:.9rem; background:var(--paper); color:var(--ink); }
+  .add-input:focus{ outline:2px solid var(--ink-soft); outline-offset:1px; }
+  .add-btn{ border:1px solid var(--ink); background:var(--ink); color:var(--paper-2); border-radius:8px; padding:9px 16px; font-size:.85rem; cursor:pointer; white-space:nowrap; font-family:'Inter'; font-weight:600; }
+
+  .back-btn{ font-size:.83rem; color:var(--ink-soft); background:none; border:none; cursor:pointer; padding:0 0 12px; display:inline-flex; align-items:center; gap:4px; font-family:'Inter'; }
+  .student-head{ margin-bottom:16px; }
+  .student-name{ font-family:'Fraunces',serif; font-weight:600; font-size:1.4rem; margin:0 0 4px; }
+  .student-sub{ color:var(--ink-soft); font-size:.86rem; margin:0; }
+
+  .tabs{ display:flex; gap:10px; margin-bottom:16px; }
+  .tab-btn{ flex:1; text-align:left; border:1px solid var(--line); background:var(--paper-2); border-radius:10px; padding:10px 14px; cursor:pointer; font-family:'Inter'; color:var(--ink); }
+  .tab-btn .tname{ font-weight:600; display:block; font-size:.94rem; }
+  .tab-btn .tstat{ font-size:.78rem; color:var(--ink-soft); }
+  .tab-btn[data-grade="7"].active{ background:var(--g7-bg); border-color:var(--g7); }
+  .tab-btn[data-grade="7"].active .tname{ color:var(--g7); }
+  .tab-btn[data-grade="8"].active{ background:var(--g8-bg); border-color:var(--g8); }
+  .tab-btn[data-grade="8"].active .tname{ color:var(--g8); }
+
+  .legend{ display:flex; gap:16px; flex-wrap:wrap; font-size:.78rem; color:var(--ink-soft); margin:2px 0 20px; }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .dot-sample{ width:12px;height:12px;border-radius:50%; display:inline-block; border:2px solid var(--todo); }
+  .dot-sample.doing{ border-color:var(--amber); background:linear-gradient(90deg,var(--amber) 50%,transparent 50%); }
+  .dot-sample.done{ border-color:var(--green); background:var(--green); }
+  .legend .hint{ color:var(--ink-soft); }
+
+  .block{ border:1px solid var(--line); border-left:4px solid var(--accent,var(--line)); border-radius:10px; background:var(--paper-2); margin-bottom:14px; overflow:hidden; }
+  .block-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:14px 16px 8px; flex-wrap:wrap; }
+  .block-title-wrap{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .block-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1.04rem; margin:0; }
+  .kbo-tag{ font-size:.70rem; color:var(--ink-soft); border:1px solid var(--line); border-radius:20px; padding:1px 8px; white-space:nowrap; }
+  .block-progress{ display:flex; align-items:center; gap:8px; }
+  .mini-bar{ width:64px; height:6px; background:var(--line); border-radius:4px; overflow:hidden; }
+  .mini-fill{ height:100%; background:var(--accent,var(--ink)); transition:width .3s ease; }
+  .mini-pct{ font-size:.76rem; color:var(--ink-soft); white-space:nowrap; }
+
+  .section-list{ list-style:none; margin:0; padding:0 8px 6px; }
+  .section-row{ border-top:1px solid var(--line); }
+  .section-row:first-child{ border-top:none; }
+  .row-main{ display:flex; align-items:center; gap:10px; padding:9px 6px; }
+  .status-dot{ width:18px;height:18px;flex:0 0 18px; border-radius:50%; border:2px solid var(--todo); background:transparent; cursor:pointer; padding:0; transition:transform .12s ease, background .15s ease, border-color .15s ease; }
+  .status-dot.small{ width:14px; height:14px; flex:0 0 14px; }
+  .status-dot:active{ transform:scale(0.85); }
+  .status-dot.status-doing{ border-color:var(--amber); background:linear-gradient(90deg,var(--amber) 50%,transparent 50%); }
+  .status-dot.status-done{ border-color:var(--green); background:var(--green); }
+  .section-title{ flex:1; text-align:left; background:none; border:none; font-family:'Inter'; font-size:.91rem; color:var(--ink); cursor:pointer; padding:2px 0; }
+  .count{ font-size:.76rem; color:var(--ink-soft); white-space:nowrap; }
+  .chev{ color:var(--ink-soft); font-size:.9rem; width:14px; text-align:center; flex:0 0 14px; }
+  .leaf-list{ list-style:none; margin:0 0 10px 44px; padding:0; border-left:2px solid var(--line); }
+  .leaf-row{ display:flex; align-items:center; gap:9px; padding:5px 0 5px 12px; }
+  .leaf-text{ font-size:.85rem; color:var(--ink-soft); }
+
+  .resource{ font-size:.74rem; color:var(--ink-soft); font-style:italic; margin:4px 16px 14px; }
+
+  .reset-row{ text-align:right; margin:6px 2px 30px; }
+  .reset-btn{ font-size:.76rem; color:var(--ink-soft); background:none; border:1px solid var(--line); border-radius:20px; padding:5px 13px; cursor:pointer; }
+  .reset-btn.confirm{ color:#8a2e2e; border-color:#8a2e2e; }
+
+  .loading{ color:var(--ink-soft); font-size:.9rem; padding:30px 0; }
+  @media (max-width:460px){
+    .kbo-tag{ display:none; }
+    .roster-grade-stat{ width:64px; }
+  }
+
+.login{max-width:420px;margin:40px auto;display:flex;flex-direction:column;gap:12px}
+.login .add-input,.login .add-btn{width:100%}
+.login .alt{background:none;color:var(--ink);border:1px solid var(--line)}
+.err{color:#8a2e2e;font-size:.85rem;min-height:1.2em}
+.topbar{display:flex;justify-content:flex-end;margin-bottom:6px}
+.roster-remove{display:none}
+.ro .status-dot{pointer-events:none}.ro .reset-row{display:none}
+.stu .back-btn{display:none}
+</style></head><body><div class="wrap" id="app"></div><script>
+const DATA = {
+  "7": {
+    label: "7 класс",
+    blocks: [
+      { id:"1", t:"Химия жизни и клеточная биология", k:"КВО 1",
+        r:"Рис Дж., Урри Л. и др. Биология Campbell, т. 1. — СПб: Диалектика, 2021",
+        sections:[
+          {id:"1-1", t:"Химический контекст жизни", p:["Элементы (макро- и микро) и соединения","Строение атома: номер, масса, изотопы","Радиоактивные метки и датирование","Химические связи: ковалентные, ионные, слабые","Химические реакции и равновесие"]},
+          {id:"1-2", t:"Вода и жизнь", p:["Водородные связи и полярность","Эмерджентные свойства воды: когезия, теплоёмкость, лёд, растворитель","Концентрация растворов: моль, молярность","Кислоты и основания, pH, буферы"]},
+          {id:"1-3", t:"Углерод и молекулярное разнообразие", p:["Углеродный скелет и его разнообразие","Углеводороды","Изомерия: структурная, цис-транс, энантиомеры","Функциональные группы"]},
+          {id:"1-4", t:"Макромолекулы", p:["Синтез и распад полимеров (дегидратация/гидролиз)","Углеводы: моно-, ди-, полисахариды","Липиды: жиры, фосфолипиды, стероиды","Белки: аминокислоты, полипептиды, уровни структуры","Нуклеиновые кислоты: ДНК и РНК"]},
+          {id:"1-5", t:"Экскурсия по клетке", p:["Прокариоты и эукариоты","Отношение поверхности к объёму","Строение эукариотической клетки, ядро, рибосомы","Эндомембранная система","Митохондрии, хлоропласты, пероксисомы","Цитоскелет, внеклеточные структуры и контакты"]}
+        ]},
+      { id:"2", t:"Ботаника", k:"КВО 2",
+        r:"Викторов В.П., Никишов А.И. Биология. Растения. Бактерии. Грибы и лишайники. — М.: ВЛАДОС, 2011",
+        sections:[
+          {id:"2-1", t:"Общее знакомство с цветковыми растениями", p:["Органы цветкового растения","Жизненные формы","Растительные сообщества и покров"]},
+          {id:"2-2", t:"Внешнее строение органов растения", p:["Корень и корневые системы","Побег, листорасположение, почки","Лист и его строение","Видоизменённые побеги","Цветок, соцветия, плоды, семена"]},
+          {id:"2-3", t:"Клеточное строение растения", p:["Строение растительной клетки","Растительные ткани","Клеточное строение листа, стебля, корня"]},
+          {id:"2-4", t:"Жизнедеятельность, рост и развитие", p:["Питание и поглощение воды","Фотосинтез и образование органических веществ","Дыхание, испарение воды, листопад","Рост и деление клеток"]},
+          {id:"2-5", t:"Размножение и расселение", p:["Вегетативное размножение","Опыление и оплодотворение","Образование и распространение плодов и семян","Прорастание семян"]},
+          {id:"2-6", t:"Классы и семейства цветковых растений", p:["Классификация","Крестоцветные, розоцветные, мотыльковые","Паслёновые, сложноцветные","Лилейные и злаки"]},
+          {id:"2-7", t:"Отделы растений", p:["Зелёные, бурые, красные водоросли","Моховидные","Папоротниковидные, хвощевидные, плауновидные","Голосеменные и покрытосеменные","Развитие растительного мира"]},
+          {id:"2-8", t:"Царство Бактерии", p:["Строение и жизнедеятельность бактерий","Роль в природе и жизни человека"]},
+          {id:"2-9", t:"Царство Грибы", p:["Плесневые грибы и дрожжи","Паразитические грибы","Шляпочные грибы","Лишайники"]},
+          {id:"2-10", t:"Растительные сообщества и их охрана", p:["Условия жизни растений, лес как сообщество","Луга, болота, тундры, степи, пустыни"]}
+        ]},
+      { id:"3", t:"Зоология", k:"КВО 2",
+        r:"Никишов А.И., Шарова И.Х. Биология. Животные. — М.: ВЛАДОС, 2012",
+        sections:[
+          {id:"3-1", t:"Общее знакомство с животными", p:["Многообразие и взаимоотношения животных"]},
+          {id:"3-2", t:"Простейшие", p:["Саркожгутиковые","Инфузории","Значение простейших"]},
+          {id:"3-3", t:"Кишечнополостные", p:["Гидроидные, сцифоидные, коралловые полипы","Размножение и регенерация","Происхождение"]},
+          {id:"3-4", t:"Черви: плоские, круглые, кольчатые", p:["Планарии, сосальщики, ленточные черви","Нематоды и борьба с паразитами","Малощетинковые и многощетинковые черви"]},
+          {id:"3-5", t:"Моллюски", p:["Брюхоногие, двустворчатые, головоногие","Происхождение и значение"]},
+          {id:"3-6", t:"Членистоногие: общие признаки", p:["Общее строение членистоногих"]},
+          {id:"3-7", t:"Ракообразные и паукообразные", p:["Строение и жизнедеятельность","Значение в природе и жизни человека"]},
+          {id:"3-8", t:"Насекомые", p:["Строение и жизнедеятельность","Главнейшие отряды","Значение, вредители, переносчики болезней"]},
+          {id:"3-9", t:"Хордовые: ланцетники и рыбы", p:["Бесчерепные, ланцетники","Хрящевые и костные рыбы","Размножение и значение рыб"]},
+          {id:"3-10", t:"Земноводные", p:["Внешнее строение и скелет","Внутренние органы и нервная система","Размножение и происхождение"]},
+          {id:"3-11", t:"Пресмыкающиеся", p:["Внешнее строение и скелет","Внутренние органы","Отряды и значение"]},
+          {id:"3-12", t:"Птицы", p:["Внешнее и внутреннее строение","Размножение и развитие","Экологические группы, охрана"]},
+          {id:"3-13", t:"Млекопитающие", p:["Строение, скелет, нервная система","Первозвери и сумчатые","Отряды плацентарных: грызуны, хищные, приматы и др.","Значение и охрана"]}
+        ]},
+      { id:"4", t:"Разнообразие жизни на Земле", k:"КВО 2",
+        r:"Тейлор Д., Грин Н., Стаут У. Биология, т. 1. — М.: Мир, 2004, гл. 2",
+        sections:[
+          {id:"4-1", t:"Классификация", p:["Таксономия и иерархия","Искусственная и естественная классификации","Определительные ключи"]},
+          {id:"4-2", t:"Пять царств", p:["Прокариоты","Вирусы","Грибы","Протисты","Царства растений и животных"]}
+        ]},
+      { id:"5", t:"Анатомия и физиология человека", k:"КВО 3",
+        r:"Любимова З.В., Маринова К.В. Биология. Человек и его здоровье. — М.: ВЛАДОС, 2012",
+        sections:[
+          {id:"5-1", t:"Общие свойства организма", p:["Клетка, ткани, органы","Строение тела человека","Нервная и гуморальная регуляция"]},
+          {id:"5-2", t:"Эндокринная система", p:["Щитовидная железа, надпочечники","Гипофиз, эпифиз, поджелудочная","Половые железы"]},
+          {id:"5-3", t:"Нервная система", p:["Строение и рефлекторный принцип","Спинной и головной мозг","Большие полушария"]},
+          {id:"5-4", t:"Опора и движение", p:["Строение и рост костей","Скелет человека","Мышцы и их функции"]},
+          {id:"5-5", t:"Кровь", p:["Состав крови","Эритроциты и переливание","Лейкоциты и иммунитет","Свёртывание"]},
+          {id:"5-6", t:"Кровообращение", p:["Система кровообращения","Работа сердца","Движение крови и лимфы"]},
+          {id:"5-7", t:"Дыхание", p:["Органы дыхания","Газообмен","Регуляция дыхания"]},
+          {id:"5-8", t:"Пищеварение", p:["Органы пищеварения","Обработка пищи во рту и желудке","Пищеварение в кишечнике"]},
+          {id:"5-9", t:"Обмен веществ и энергии", p:["Обмен веществ и витамины","Энергетический обмен","Терморегуляция"]},
+          {id:"5-10", t:"Выделение", p:["Мочевыделительная система","Регуляция образования мочи"]},
+          {id:"5-11", t:"Размножение и развитие", p:["Органы размножения","Половое созревание","Внутриутробное развитие"]},
+          {id:"5-12", t:"Сенсорные системы", p:["Зрение","Слух","Равновесие, осязание, обоняние, вкус"]},
+          {id:"5-13", t:"Высшая нервная деятельность", p:["Условные и безусловные рефлексы","Эмоции, память, мышление","Сон и бодрствование"]}
+        ]},
+      { id:"6", t:"Сравнительная физиология животных", k:"КВО 3",
+        r:"Тейлор Д., Грин Н., Стаут У. Биология, т. 1. — М.: Мир, 2004, гл. 8, 14, 17–20",
+        sections:[
+          {id:"6-1", t:"Гетеротрофное питание", p:["Типы питания и механизмы у животных","Пищеварительный канал человека","Питание человека и нормы потребления"]},
+          {id:"6-2", t:"Транспорт у животных", p:["Эволюция кровеносной системы","Строение и работа сердца","Иммунная система, группы крови"]},
+          {id:"6-3", t:"Координация и регуляция", p:["Нервный импульс и синапс","Сенсорные рецепторы","Эндокринная система и гормоны"]},
+          {id:"6-4", t:"Опорно-двигательная система животных", p:["Скелетные системы и ткани","Мышечное сокращение","Локомоция"]},
+          {id:"6-5", t:"Гомеостаз", p:["Регуляция глюкозы","Терморегуляция","Строение и функции печени"]},
+          {id:"6-6", t:"Экскреция и осморегуляция", p:["Выделительные структуры","Азотистые экскреты","Почки человека, регуляция ионов и pH"]}
+        ]}
+    ]
+  },
+  "8": {
+    label: "8 класс",
+    blocks: [
+      { id:"1", t:"Клеточная биология и биохимия", k:"КВО 1–2",
+        r:"Campbell Biology, 10th ed. — Reece, Urry, Cain, Wasserman, Minorsky, Jackson, 2014",
+        sections:[
+          {id:"1-1", t:"Химический контекст жизни", p:["Элемент, вещество, соединение","Строение атома и свойства элементов","Химические связи","Химические реакции"]},
+          {id:"1-2", t:"Вода и жизнь", p:["Водородные связи","Эмерджентные свойства воды","Кислоты, основания, pH, буферы"]},
+          {id:"1-3", t:"Углерод и молекулярное разнообразие", p:["Органическая химия и происхождение молекул","Изомерия","Функциональные группы, АТФ"]},
+          {id:"1-4", t:"Структура и функции макромолекул", p:["Углеводы, липиды, белки, нуклеиновые кислоты","Геномика и протеомика"]},
+          {id:"1-5", t:"Строение и функции клетки", p:["Методы изучения клеток, микроскопия","Эукариоты и прокариоты","Строение и функции органелл"]},
+          {id:"1-6", t:"Клеточные мембраны", p:["Фосфолипидный бислой","Транспортные белки, избирательная проницаемость","Активный/пассивный транспорт","Экзо- и эндоцитоз"]},
+          {id:"1-7", t:"Метаболизм", p:["Анаболизм и катаболизм","Свободная энергия, АТФ","Ферменты"]},
+          {id:"1-8", t:"Клеточное дыхание", p:["Окислительно-восстановительные реакции","Гликолиз, цикл Кребса, окислительное фосфорилирование","Брожение и анаэробное дыхание"]},
+          {id:"1-9", t:"Фотосинтез", p:["Строение хлоропласта","Световая фаза и цикл Кальвина","Альтернативные пути фиксации углерода"]},
+          {id:"1-10", t:"Клеточная коммуникация", p:["Локальная и дистантная передача сигнала","Рецепция, трансдукция, ответ","Апоптоз"]},
+          {id:"1-11", t:"Клеточный цикл", p:["Организация генетического материала","Фазы клеточного цикла, митоз","Регуляция клеточного цикла"]}
+        ]},
+      { id:"2", t:"Биосистематика и эволюция таксонов", k:"КВО 1–2",
+        r:"Campbell Biology, 10th ed. — Reece, Urry, Cain, Wasserman, Minorsky, Jackson, 2014",
+        sections:[
+          {id:"2-1", t:"Филогенез и Древо жизни", p:["Филогенетические древа","Биномиальная номенклатура","Гомологи и аналоги, паралоги и ортологи"]},
+          {id:"2-2", t:"Бактерии и археи", p:["Грам+ и грам- бактерии","Механизмы генетического разнообразия","Разнообразие прокариот и архей"]},
+          {id:"2-3", t:"Простейшие", p:["Теория вторичного эндосимбиоза","Супергруппы простейших","Жизненные циклы, экологическое значение"]},
+          {id:"2-4", t:"Многообразие растений", p:["Адаптации к жизни на суше","Бессосудистые и сосудистые растения","Голосеменные и покрытосеменные"]},
+          {id:"2-5", t:"Многообразие животных", p:["Симметрия тела","Первичноротые и вторичноротые","Основные типы: губки, черви, моллюски, членистоногие, иглокожие, хордовые"]},
+          {id:"2-6", t:"Грибы", p:["Строение и питание","Половое и бесполое размножение","Классификация и экологическое значение"]}
+        ]},
+      { id:"3", t:"Анатомия и физиология растений", k:"КВО 2–3",
+        r:"Campbell Biology, 10th ed. — Reece, Urry, Cain, Wasserman, Minorsky, Jackson, 2014",
+        sections:[
+          {id:"3-1", t:"Строение и развитие растений", p:["Меристемы, первичный и вторичный рост","Морфогенез","Типы клеток"]},
+          {id:"3-2", t:"Транспорт у растений", p:["Флоэма и ксилема","Транспирация","Симпласт и апопласт, осмос"]},
+          {id:"3-3", t:"Размножение растений", p:["Структура цветка и опыление","Жизненный цикл покрытосеменных","Развитие семени и плода"]},
+          {id:"3-4", t:"Фитогормоны", p:["Классификация и функции гормонов","Тропизмы","Ауксин и гиббереллин"]},
+          {id:"3-5", t:"Цветение", p:["Фитохромы","Красный/дальний красный свет","Фотопериодизм, циркадные ритмы"]},
+          {id:"3-6", t:"Устьица", p:["Механизм открывания/закрывания","Регуляция в засушливых условиях"]},
+          {id:"3-7", t:"Почва и питание", p:["Макро- и микроэлементы","Обмен катионов","Микориза, азотный цикл"]}
+        ]},
+      { id:"4", t:"Анатомия и физиология животных", k:"КВО 2–3",
+        r:"Campbell Biology, 10th ed. — Reece, Urry, Cain, Wasserman, Minorsky, Jackson, 2014",
+        sections:[
+          {id:"4-1", t:"Основные принципы строения и функционирования", p:["Обмен со средой","Гомеостаз","Биоэнергетика и метаболизм"]},
+          {id:"4-2", t:"Пищеварение", p:["Типы питания и диеты","Этапы переработки пищи","Эволюционные адаптации ЖКТ"]},
+          {id:"4-3", t:"Кровообращение", p:["Замкнутые и незамкнутые системы","Строение сердца млекопитающих","Сердечно-сосудистые заболевания"]},
+          {id:"4-4", t:"Газообмен", p:["Дыхательные поверхности: жабры, трахеи, лёгкие","Контроль дыхания","Дыхательные пигменты"]},
+          {id:"4-5", t:"Иммунная система", p:["Врождённый и приобретённый иммунитет","Антитела","Аллергии и аутоиммунные заболевания"]},
+          {id:"4-6", t:"Осморегуляция и экскреция", p:["Механизмы осморегуляции","Типы азотистых экскретов","Строение нефрона"]},
+          {id:"4-7", t:"Эндокринная система", p:["Типы межклеточной коммуникации","Гормональные пути и обратная связь","Координация с нервной системой"]},
+          {id:"4-8", t:"Размножение и развитие", p:["Гаметогенез и гормональный контроль","Оплодотворение","Дробление, гаструляция, органогенез"]},
+          {id:"4-9", t:"Нейроны и нервная система", p:["Потенциал покоя и действия","Синапсы и нейромедиаторы","ЦНС и ПНС, эволюция мозга"]},
+          {id:"4-10", t:"Сенсорные и моторные механизмы", p:["Типы рецепторов","Строение глаза и уха","Скелетная мускулатура и локомоция"]}
+        ]},
+      { id:"5", t:"Этология", k:"КВО 2–3",
+        r:"Campbell Biology, 10th ed. — Reece, Urry, Cain, Wasserman, Minorsky, Jackson, 2014",
+        sections:[
+          {id:"5-1", t:"Врождённое поведение", p:["Фиксированные комплексы действий","Миграция","Сигналы и феромоны"]},
+          {id:"5-2", t:"Обучение и изменение поведения", p:["Импринтинг","Ассоциативное и социальное обучение","Когнитивная деятельность"]},
+          {id:"5-3", t:"Факторы разнообразия поведения", p:["Оптимальная фуражировка","Половой отбор и забота о потомстве","Теория игр"]},
+          {id:"5-4", t:"Эволюция поведения", p:["Генетические основы поведения","Альтруизм","Правило Гамильтона, реципрокный альтруизм"]}
+        ]},
+      { id:"6", t:"Молекулярная биология и генетика", k:"КВО 3",
+        r:"Campbell Biology, 10th ed. — Reece, Urry, Cain, Wasserman, Minorsky, Jackson, 2014",
+        sections:[
+          {id:"6-1", t:"Мейоз", p:["Стадии мейоза","Митоз и мейоз: сравнение","Наследственная изменчивость"]},
+          {id:"6-2", t:"Менделевская генетика", p:["Законы расщепления и независимого наследования","Множественные аллели, плейотропия, эпистаз","Анализ родословных"]},
+          {id:"6-3", t:"Сцепленные гены", p:["Хромосомная теория наследственности","Рекомбинация и сцепление","Наследование геномов органелл"]},
+          {id:"6-4", t:"Сцепленные с полом гены", p:["Хромосомные основы пола","Инактивация X-хромосомы","Геномный импринтинг"]},
+          {id:"6-5", t:"Мутации", p:["Аномалии числа хромосом","Точечные мутации","Инсерции, делеции, мутагенез"]},
+          {id:"6-6", t:"Молекулярная догма", p:["Эксперименты Гриффита, Херши-Чейз","Структура и репликация ДНК","Транскрипция и трансляция"]},
+          {id:"6-7", t:"Регуляция экспрессии генов", p:["Оперон","Регуляция хроматина, эпигенетика","Рак"]},
+          {id:"6-8", t:"Вирусы", p:["Структура и геномы вирусов","Литический и лизогенный циклы","Вироиды и прионы"]},
+          {id:"6-9", t:"Биотехнология", p:["Секвенирование и клонирование ДНК","ОТ-ПЦР","Стволовые клетки"]},
+          {id:"6-10", t:"Геномы", p:["Секвенирование и метагеномика","Псевдогены, транспозоны","Сравнение геномов"]}
+        ]},
+      { id:"7", t:"Механизмы эволюции", k:"КВО 3",
+        r:"Campbell Biology, 10th ed. — Reece, Urry, Cain, Wasserman, Minorsky, Jackson, 2014",
+        sections:[
+          {id:"7-1", t:"Естественный отбор", p:["Гипотезы происхождения видов","Искусственный и естественный отбор","Гомология и конвергенция"]},
+          {id:"7-2", t:"Популяционная эволюция", p:["Механизмы генетической изменчивости","Уравнение Харди-Вайнберга","Дрейф генов и поток генов"]},
+          {id:"7-3", t:"Происхождение видов", p:["Концепции вида","Репродуктивные барьеры","Аллопатрическое и симпатрическое видообразование"]},
+          {id:"7-4", t:"История жизни на Земле", p:["Возникновение жизни","Палеонтология и возраст","Массовые вымирания"]}
+        ]},
+      { id:"8", t:"Экология", k:"КВО 3",
+        r:"Campbell Biology, 10th ed. — Reece, Urry, Cain, Wasserman, Minorsky, Jackson, 2014",
+        sections:[
+          {id:"8-1", t:"Биосфера", p:["Климат и биомы","Биотические и абиотические факторы"]},
+          {id:"8-2", t:"Популяционная экология", p:["Динамика и плотность популяций","Логистический и экспоненциальный рост","r- и K-отбор"]},
+          {id:"8-3", t:"Экология сообществ", p:["Типы взаимоотношений видов","Трофические уровни","Индекс разнообразия Шеннона"]},
+          {id:"8-4", t:"Экосистемы", p:["Поток энергии и трофические уровни","Первичная продукция","Биогеохимические циклы, влияние человека"]}
+        ]}
+    ]
+  }
+};
+// ---- lookup index: grade -> sectionId -> section object
+const SECTION_INDEX = {};
+Object.keys(DATA).forEach(g => {
+  SECTION_INDEX[g] = {};
+  DATA[g].blocks.forEach(b => b.sections.forEach(s => { SECTION_INDEX[g][s.id] = s; }));
+});
+
+let roster = [];        // [{id,name}]
+let progress = {};      // {studentId: {"7":{leafId:status}, "8":{...}}}
+let view = "overview";  // "overview" | "student"
+let activeStudentId = null;
+let activeGrade = "7";
+let expandedTopics = new Set(); // keys "grade:sectionId" — shared UI state, not per-student
+let removeArmed = null;
+let resetArmed = null;
+
+function escapeHtml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function genId(){ return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function val(status){ return status === 'done' ? 1 : status === 'doing' ? 0.5 : 0; }
+function fmt(n){ return Number.isInteger(n) ? n : n.toFixed(1); }
+
+function leafStatus(studentId, grade, lid){
+  const b = (progress[studentId] && progress[studentId][grade]) || {};
+  return b[lid] || 'todo';
+}
+function setLeafStatus(studentId, grade, lid, status){
+  if (!progress[studentId]) progress[studentId] = {};
+  if (!progress[studentId][grade]) progress[studentId][grade] = {};
+  if (status === 'todo') delete progress[studentId][grade][lid];
+  else progress[studentId][grade][lid] = status;
+}
+
+function sectionStats(studentId, grade, section){
+  let done = 0;
+  section.p.forEach((_, i) => done += val(leafStatus(studentId, grade, section.id + '#' + i)));
+  return { done, total: section.p.length };
+}
+function blockStats(studentId, grade, block){
+  let done = 0, total = 0;
+  block.sections.forEach(s => { const st = sectionStats(studentId, grade, s); done += st.done; total += st.total; });
+  return { done, total };
+}
+function gradeStats(studentId, grade){
+  let done = 0, total = 0;
+  DATA[grade].blocks.forEach(b => { const st = blockStats(studentId, grade, b); done += st.done; total += st.total; });
+  return { done, total };
+}
+function studentOverall(studentId){
+  const a = gradeStats(studentId, '7'), b = gradeStats(studentId, '8');
+  return { done: a.done + b.done, total: a.total + b.total };
+}
+function classAveragePct(){
+  if (roster.length === 0) return null;
+  let sum = 0;
+  roster.forEach(st => { const o = studentOverall(st.id); sum += o.total ? (o.done / o.total * 100) : 0; });
+  return Math.round(sum / roster.length);
+}
+
+// ---------- rendering ----------
+
+function renderLeaf(studentId, grade, sectionId, i, text){
+  const lid = sectionId + '#' + i;
+  const s = leafStatus(studentId, grade, lid);
+  return '<li class="leaf-row">' +
+    '<button class="status-dot small status-' + s + '" data-action="leaf" data-grade="' + grade + '" data-section="' + sectionId + '" data-idx="' + i + '" aria-label="Отметить подпункт"></button>' +
+    '<span class="leaf-text">' + escapeHtml(text) + '</span>' +
+  '</li>';
+}
+
+function renderSection(studentId, grade, section){
+  const st = sectionStats(studentId, grade, section);
+  const cls = st.done === 0 ? 'todo' : (st.done >= st.total ? 'done' : 'doing');
+  const key = grade + ':' + section.id;
+  const open = expandedTopics.has(key);
+  let html = '<li class="section-row">' +
+    '<div class="row-main">' +
+      '<button class="status-dot status-' + cls + '" data-action="topic-bulk" data-grade="' + grade + '" data-section="' + section.id + '" aria-label="Отметить всю тему"></button>' +
+      '<button class="section-title" data-action="expand" data-grade="' + grade + '" data-section="' + section.id + '">' + escapeHtml(section.t) + '</button>' +
+      '<span class="count">' + fmt(st.done) + '/' + st.total + '</span>' +
+      '<span class="chev">' + (open ? '\u2212' : '+') + '</span>' +
+    '</div>';
+  if (open){
+    html += '<ul class="leaf-list">' + section.p.map((pt, i) => renderLeaf(studentId, grade, section.id, i, pt)).join('') + '</ul>';
+  }
+  html += '</li>';
+  return html;
+}
+
+function renderBlock(studentId, grade, block){
+  const st = blockStats(studentId, grade, block);
+  const pct = st.total ? Math.round((st.done / st.total) * 100) : 0;
+  const accentVar = grade === '7' ? 'var(--g7)' : 'var(--g8)';
+  return '<section class="block" style="--accent:' + accentVar + '">' +
+    '<div class="block-head">' +
+      '<div class="block-title-wrap">' +
+        '<h3 class="block-title">' + escapeHtml(block.t) + '</h3>' +
+        '<span class="kbo-tag">' + escapeHtml(block.k) + '</span>' +
+      '</div>' +
+      '<div class="block-progress">' +
+        '<div class="mini-bar"><div class="mini-fill" style="width:' + pct + '%"></div></div>' +
+        '<span class="mini-pct">' + fmt(st.done) + '/' + st.total + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<ul class="section-list">' + block.sections.map(s => renderSection(studentId, grade, s)).join('') + '</ul>' +
+    '<p class="resource">Источник: ' + escapeHtml(block.r) + '</p>' +
+  '</section>';
+}
+
+function renderRosterRow(st){
+  const s7 = gradeStats(st.id, '7');
+  const s8 = gradeStats(st.id, '8');
+  const p7 = s7.total ? Math.round(s7.done / s7.total * 100) : 0;
+  const p8 = s8.total ? Math.round(s8.done / s8.total * 100) : 0;
+  return '<div class="roster-row">' +
+    '<button class="roster-name" data-action="open-student" data-id="' + st.id + '">' + escapeHtml(st.name) + '</button>' +
+    '<div class="roster-grades">' +
+      '<div class="roster-grade-stat"><span class="roster-grade-label">7 кл · ' + p7 + '%</span><div class="roster-grade-bar"><div class="roster-grade-fill g7" style="width:' + p7 + '%"></div></div></div>' +
+      '<div class="roster-grade-stat"><span class="roster-grade-label">8 кл · ' + p8 + '%</span><div class="roster-grade-bar"><div class="roster-grade-fill g8" style="width:' + p8 + '%"></div></div></div>' +
+    '</div>' +
+    '<button class="roster-remove' + (removeArmed === st.id ? ' confirm' : '') + '" data-action="remove-student" data-id="' + st.id + '">' + (removeArmed === st.id ? 'Точно?' : 'Удалить') + '</button>' +
+  '</div>';
+}
+
+
+const ADMIN_PASSWORD='bio2026'; // <-- ПАРОЛЬДІ ОСЫНДА ӨЗГЕРТІҢІЗ
+let db=null,user=null,uid=null,mode='login',err='',saving=false,pending=false,unsub=null;
+const $app=document.getElementById('app');
+function makeCode(){
+  let d='';
+  ['7','8'].forEach(g=>DATA[g].blocks.forEach(b=>b.sections.forEach(sc=>sc.p.forEach((_,i)=>{const v=leafStatus(uid,g,sc.id+'#'+i);d+=v==='done'?'2':v==='doing'?'1':'0';}))));
+  return btoa(unescape(encodeURIComponent(roster[0].name)))+'.'+d;
+}
+function parseCode(c){
+  const [n,d]=c.trim().split('.');
+  const name=decodeURIComponent(escape(atob(n)));
+  const p={'7':{},'8':{}};let k=0;
+  ['7','8'].forEach(g=>DATA[g].blocks.forEach(b=>b.sections.forEach(sc=>sc.p.forEach((_,i)=>{const v=d[k++];if(v==='1')p[g][sc.id+'#'+i]='doing';if(v==='2')p[g][sc.id+'#'+i]='done';}))));
+  if(k!==d.length)throw new Error('len');
+  return {name,p};
+}
+function saveMine(){
+  try{localStorage.setItem('kbo-me',JSON.stringify({name:roster[0].name,p:progress[uid]}));}catch(e){}
+  const t=document.getElementById('code');if(t)t.value=makeCode();
+}
+function renderOverview(){
+  const avg=classAveragePct();
+  let h='<div class="hero"><div class="hero-num">'+(avg===null?'—':avg+'%')+'</div><div class="hero-side"><div class="hero-label">'+(avg===null?'оқушылар әлі тіркелген жоқ':'сынып бойынша орташа прогресс · оқушы саны: '+roster.length)+'</div><div class="hero-bar"><div class="hero-fill" style="width:'+(avg||0)+'%"></div></div></div></div>';
+  h+='<section class="roster-card">'+(roster.length?roster.map(renderRosterRow).join(''):'<div class="roster-empty">Пока нет учеников. Вставьте первый код ниже.</div>')+'<form class="add-row" data-action="import-code"><input class="add-input" name="c" placeholder="Код прогресса от ученика" required /><button class="add-btn" type="submit">Добавить</button></form></section><div class="err">'+escapeHtml(err)+'</div>';
+  return h;
+}
+function renderStudentView(){
+  const student = roster.find(r => r.id === activeStudentId);
+  if (!student){ view = 'overview'; return renderOverview(); }
+
+  const g7 = gradeStats(student.id, '7');
+  const g8 = gradeStats(student.id, '8');
+  const gp = gradeStats(student.id, activeGrade);
+  const pct = gp.total ? Math.round(gp.done / gp.total * 100) : 0;
+
+  let html = '<button class="back-btn" data-action="back">\u2190 Все ученики</button>';
+  html += '<div class="student-head"><h2 class="student-name">' + escapeHtml(student.name) + '</h2>' +
+    '<p class="student-sub">7 класс — ' + (g7.total ? Math.round(g7.done/g7.total*100) : 0) + '% · 8 класс — ' + (g8.total ? Math.round(g8.done/g8.total*100) : 0) + '%</p></div>';
+
+  html += '<div class="tabs">';
+  ['7','8'].forEach(g => {
+    const stg = gradeStats(student.id, g);
+    const p = stg.total ? Math.round(stg.done/stg.total*100) : 0;
+    html += '<button class="tab-btn' + (activeGrade === g ? ' active' : '') + '" data-action="tab" data-grade="' + g + '">' +
+      '<span class="tname">' + DATA[g].label + '</span>' +
+      '<span class="tstat">' + fmt(stg.done) + '/' + stg.total + ' тем · ' + p + '%</span>' +
+    '</button>';
+  });
+  html += '</div>';
+
+  html += '<div class="legend">' +
+    '<span><span class="dot-sample"></span>не начато</span>' +
+    '<span><span class="dot-sample doing"></span>в процессе</span>' +
+    '<span><span class="dot-sample done"></span>изучено</span>' +
+  '</div>';
+
+  html += '<div class="blocks">' + DATA[activeGrade].blocks.map(b => renderBlock(student.id, activeGrade, b)).join('') + '</div>';
+
+  html += '<div class="reset-row"><button class="reset-btn' + (resetArmed === (student.id+activeGrade) ? ' confirm' : '') + '" data-action="reset" data-grade="' + activeGrade + '">' +
+    (resetArmed === (student.id+activeGrade) ? 'Нажмите ещё раз для сброса' : 'Сбросить прогресс · ' + DATA[activeGrade].label) +
+  '</button></div>';
+
+  return html;
+}
+
+
+function loginView(){
+  return '<div class="login"><h1 class="page-title">Трекер силлабуса КВО · Биология</h1><p class="page-sub">Выберите, как войти.</p>'+
+  '<form data-action="student-login" class="login"><input class="add-input" name="n" placeholder="Ваше имя и фамилия" required /><button class="add-btn" type="submit">Войти как ученик</button></form>'+
+  '<form data-action="admin-login" class="login"><input class="add-input" name="p" type="password" placeholder="Пароль учителя" required /><button class="add-btn alt" type="submit">Войти как учитель</button></form>'+
+  '<form data-action="restore-code" class="login"><input class="add-input" name="c" placeholder="Код прогресса (восстановить на другом устройстве)" required /><button class="add-btn alt" type="submit">Восстановить по коду</button></form>'+
+  '<div class="err">'+escapeHtml(err)+'</div></div>';
+}
+function render(){
+  $app.className='wrap'+(mode==='admin'?' ro':'')+(mode==='student'?' stu':'');
+  if(mode==='login'){$app.innerHTML=loginView();return;}
+  let h='<div class="topbar"><button class="back-btn" data-action="logout">Выйти</button></div><h1 class="page-title">Трекер силлабуса КВО · Биология</h1>';
+  h+='<p class="page-sub">'+(mode==='admin'?'Режим учителя: прогресс всех учеников (только просмотр, обновляется сам).':'Кружок у темы отмечает её целиком, разверните тему — чтобы отмечать подпункты. Всё сохраняется автоматически.')+'</p>';
+  if(mode==='student')h+='<div class="roster-card" style="padding:12px 14px;margin-bottom:18px"><div class="hero-label">Код прогресса: скопируйте и отправьте учителю</div><textarea id="code" readonly class="add-input" style="width:100%;height:56px" onclick="this.select()">'+makeCode()+'</textarea></div>';
+  h+=(mode==='student'||view==='student')?renderStudentView():renderOverview();
+  $app.innerHTML=h;
+}
+function startStudent(name){
+  let p={};
+  try{const x=JSON.parse(localStorage.getItem('kbo-me')||'null');if(x&&x.name===name)p=x.p||{};}catch(e){}
+  uid='me';roster=[{id:uid,name}];progress={};progress[uid]=p;
+  activeStudentId=uid;activeGrade='7';mode='student';view='student';
+  render();saveMine();
+}
+function startAdmin(){
+  mode='admin';view='overview';
+  unsub=db.collection('progress').onSnapshot(snap=>{
+    roster=[];progress={};
+    snap.docs.forEach(d=>{const x=d.data();roster.push({id:d.id,name:x.name||'?'});try{progress[d.id]=JSON.parse(x.p||'{}');}catch(e){progress[d.id]={};}});
+    roster.sort((a,b)=>a.name.localeCompare(b.name,'ru'));
+    render();
+  },e=>{err='Нет доступа к данным';mode='login';render();});
+  render();
+}
+$app.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const a=e.target.dataset.action;
+  if(a==='student-login'){
+    const n=e.target.n.value.trim();if(!n)return;
+    startStudent(n);
+  }
+  if(a==='restore-code'){
+    try{const x=parseCode(e.target.c.value);try{localStorage.setItem('kbo-me',JSON.stringify({name:x.name,p:x.p}));}catch(z){}err='';startStudent(x.name);}catch(z){err='Код не подошёл';render();}
+    return;
+  }
+  if(a==='import-code'){
+    try{const x=parseCode(e.target.c.value);const id='s'+Array.from(x.name).reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,7).toString(36);await db.doc('progress/'+id).set({name:x.name,p:JSON.stringify(x.p),t:Date.now()});err='';}catch(x){err='Код не подошёл или нет доступа';render();}
+    return;
+  }
+  if(a==='admin-login'){
+    if(e.target.p.value!==ADMIN_PASSWORD){err='Неверный пароль';render();return;}
+    if(!db){err='Режим учителя: войдите в свой аккаунт claude.ai и откройте страницу из него';render();return;}
+    err='';startAdmin();
+  }
+});
+$app.addEventListener('click',async e=>{
+  const el=e.target.closest('[data-action]');if(!el)return;
+  const a=el.dataset.action;
+  if(a==='logout'){if(unsub)unsub();unsub=null;mode='login';err='';roster=[];progress={};render();return;}
+  if(a==='open-student'){activeStudentId=el.dataset.id;activeGrade='7';view='student';render();return;}
+  if(a==='back'){view='overview';render();return;}
+  if(a==='tab'){activeGrade=el.dataset.grade;render();return;}
+  if(a==='expand'){const k=el.dataset.grade+':'+el.dataset.section;expandedTopics.has(k)?expandedTopics.delete(k):expandedTopics.add(k);render();return;}
+  if(mode!=='student')return;
+  if(a==='topic-bulk'){toggleSectionBulk(uid,el.dataset.grade,SECTION_INDEX[el.dataset.grade][el.dataset.section]);render();saveMine();return;}
+  if(a==='leaf'){
+    const g=el.dataset.grade,lid=el.dataset.section+'#'+el.dataset.idx,c=leafStatus(uid,g,lid);
+    setLeafStatus(uid,g,lid,c==='todo'?'doing':c==='doing'?'done':'todo');render();saveMine();return;
+  }
+  if(a==='reset'){
+    const g=el.dataset.grade,k=uid+g;
+    if(resetArmed===k){progress[uid][g]={};resetArmed=null;render();saveMine();}
+    else{resetArmed=k;render();setTimeout(()=>{if(resetArmed===k){resetArmed=null;render();}},3000);}
+  }
+});
+function localDb(){const K='kbo-teacher';const get=()=>{try{return JSON.parse(localStorage.getItem(K)||'{}');}catch(e){return {};}};const subs=[];
+const emit=()=>{const o=get();const docs=Object.keys(o).map(id=>({id:id,data:()=>o[id]}));subs.forEach(f=>f({docs:docs}));};
+return{doc:p=>({set:async d=>{const o=get();o[p.split('/')[1]]=d;try{localStorage.setItem(K,JSON.stringify(o));}catch(e){}emit();}}),
+collection:()=>({onSnapshot:f=>{subs.push(f);emit();return()=>{const i=subs.indexOf(f);if(i>=0)subs.splice(i,1);};}})};}
+(async function init(){
+  try{db=await claude.use('db');user=await claude.use('user');uid=user?await user.id():null;}catch(e){db=null;}
+  db=localDb();
+  render();
+})();
+
+</script></body></html>
